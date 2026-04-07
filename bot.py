@@ -1,69 +1,76 @@
 import discord
-import asyncio
-import random
+from discord.ext import commands
 import os
+import asyncio
 
 TOKEN = os.getenv("TOKEN")
 
-GUILD_ID = 1453098427461402766   # 👉 ID server
-VOICE_ID = 1490673130824401016  # 👉 ID room voice
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix="!", intents=intents)
 
+# ✨ chữ đẹp giữ nguyên
+base_text = "𝑲𝒂𝒏𝒈 𝑾 𝑩𝒐𝒏𝒈 ♡"
+
+# 🌈 icon siêu nhiều
 icons = [
     "🌈","✨","💫","🔥","💖","⚡","🌟","🌀","🎧","👑",
-    "💎","🌸","🌙","⭐","🖤","🤍","💜","💙","💚","💛"
+    "💎","🌸","🌺","🍀","🌙","☀️","⭐","🌻","🎶","🖤",
+    "🤍","💜","💙","💚","💛","🧡","❤️","💥","🎀","🧸",
+    "🦋","🐉","🍓","🍒","🥀","🌼","🌊","☁️","🧿","🔮"
 ]
 
-NAME = "𝑲𝒂𝒏𝒈 𝑾 𝑩𝒐𝒏𝒈 ♡"
+def generate_frames(text):
+    frames = []
+    for icon in icons:
+        frames.append(f"{icon} {text} {icon}")
+    return frames
 
-intents = discord.Intents.default()
-intents.guilds = True
-intents.voice_states = True
+@bot.event
+async def on_ready():
+    print(f"✅ Logged in: {bot.user}")
 
-class MyBot(discord.Client):
-    async def on_ready(self):
-        print(f"✅ Logged in: {self.user}")
+    await asyncio.sleep(5)
 
-        guild = self.get_guild(GUILD_ID)
-        channel = guild.get_channel(VOICE_ID)
+    channel_id = 1490673130824401016
+    channel = bot.get_channel(channel_id)
 
-        # 🎧 vào voice
-        try:
-            await channel.connect()
-            print("🎧 Joined voice")
-        except:
-            print("⚠️ đã ở trong voice hoặc lỗi connect")
-
-        # chạy loop đổi tên
-        self.loop.create_task(self.rename_loop(guild))
-
-    async def rename_loop(self, guild):
-        await self.wait_until_ready()
-        me = guild.get_member(self.user.id)
-
+    # 🎧 vào voice
+    if channel:
         while True:
             try:
-                icon = random.choice(icons)
-                new_name = f"{icon} {NAME} {icon}"
-
-                await me.edit(nick=new_name)
-
-                # ⚡ delay chuẩn né block
-                await asyncio.sleep(random.uniform(2.6, 3.3))
-
+                vc = await channel.connect(timeout=60, reconnect=True)
+                await vc.guild.change_voice_state(
+                    channel=channel,
+                    self_mute=True,
+                    self_deaf=True
+                )
+                print("🎧 Joined voice")
+                break
             except Exception as e:
-                print("⚠️ Rename lỗi:", e)
-
-                # nếu bị chặn thì nghỉ ngắn thôi
+                print("❌ Voice error:", e)
                 await asyncio.sleep(5)
 
-bot = MyBot(intents=intents)
+    guild = bot.guilds[0]
+    me = guild.me
 
+    frames = generate_frames(base_text)
+
+    while True:
+        try:
+            for frame in frames:
+                await me.edit(nick=frame)
+                await asyncio.sleep(0.8)  # ⚡ nhanh hơn
+        except Exception as e:
+            print("❌ Rename error:", e)
+            await asyncio.sleep(5)
+
+# 🔥 chống crash
 while True:
     try:
         if not TOKEN:
-            print("❌ thiếu TOKEN")
+            print("❌ Missing TOKEN")
         else:
-            print("🚀 Bot đang chạy...")
+            print("🚀 Running bot...")
             bot.run(TOKEN)
     except Exception as e:
-        print("💥 Crash, restart:", e)
+        print("💥 Crash, restarting:", e)
