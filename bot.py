@@ -9,7 +9,7 @@ intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 # ✨ chữ đẹp giữ nguyên
-base_text = "𝑲𝒂𝒏𝒈 𝑾 𝑩𝒐𝒏𝒈 ♡"
+base_text = "♡𝑩𝒐𝒏𝒈 𝑾 𝑲𝒂𝒏𝒈♡"
 
 # 🌈 icon siêu nhiều
 icons = [
